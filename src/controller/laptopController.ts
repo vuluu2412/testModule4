@@ -4,7 +4,7 @@ import {Brand} from "../model/brands";
 
 class LaptopController {
     getAll = async (req: Request, res: Response) => {
-        let laptops = await Laptop.find().sort({'price': 1}).populate("Brand");
+        let laptops = await Laptop.find().populate("user");
         return res.status(200).json(laptops);
 
     }
@@ -20,10 +20,9 @@ class LaptopController {
 
     addLaptop = async (req: Request, res: Response) => {
         let b = req.body;
-        await Laptop.create(b)
-        return res.status(200).json({
-            message: "add success"
-        })
+        console.log(b)
+         let laptopCreate = await Laptop.create(b)
+        return res.status(200).json( laptopCreate)
     }
     editLaptop = async (req: Request, res: Response) => {
         await Laptop.updateMany({_id: req.params.id}, req.body);

@@ -17,41 +17,49 @@ class UserController {
         });
         if (checkUsername) {
             return res.status(200).json({
-                message: 'User name exist'
+                message: 'User name exist',
+                check:false
             })
         } else if (user.username === '' && user.password === '') {
             return res.status(200).json({
-                message: 'User name or password is empty!'
+                message: 'User name or password is empty!',
+                check:false
             })
 
         } else if (user.username.length < 6) {
             return res.status(200).json({
-                message: 'Invalid name!!'
+                message: 'Invalid name!!',
+                check:false
             })
         } else if (user.password.length < 6 || user.password.length > 8) {
             return res.status(200).json({
-                message: 'Invalid password!!'
+                message: 'Invalid password!!',
+                check:false
             })
         } else if (user.phoneNumber.length <= 9) {
             return res.status(200).json({
-                message: 'Invalid phone number!!'
+                message: 'Invalid phone number!!',
+                check:false
             })
         } else {
             user.password = await bcrypt.hash(user.password, 10);
             user = await User.create(user);
-            return res.status(201).json(user)
+            return res.status(201).json({user,check:true})
+
         }
 
     };
 
     login = async (req: Request, res: Response) => {
         let user = req.body;
+        console.log(user)
         let userFind = await User.findOne({
             username: user.username
         })
         if (!userFind) {
             return res.status(200).json({
-                message: 'User is not exist!'
+                message: 'User is not exist!',
+                check: false
             })
         } else {
             let compare = await bcrypt.compare(user.password, userFind.password)
@@ -62,14 +70,17 @@ class UserController {
             } else {
                 let payload = {
                     idUser: userFind._id,
-                    username: userFind.username
+                    username: userFind.username,
+
                 }
                 let token = await jwt.sign(payload, SECRET, {
                     expiresIn: 36000
                 });
                 return res.status(200).json({
                     token: token,
-                    id: userFind._id
+                    userCurrent: userFind,
+                    id: userFind._id,
+                    check: true
                 })
             }
         }
